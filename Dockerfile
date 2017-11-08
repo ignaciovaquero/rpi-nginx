@@ -1,21 +1,19 @@
-FROM resin/rpi-raspbian:jessie-20161202
+FROM resin/rpi-raspbian:stretch-20171108
 MAINTAINER Ignacio Vaquero <i.vaqueroguisasola@gmail.com>
 
-LABEL org.label-schema.name="rpi-nginx" \
-      org.label-schema.description="An nginx image for raspberry pi" \
-      org.label-schema.vcs-url="https://github.com/igvaquero18/rpi-nginx" \
-      org.label-schema.version="0.1.0" \
-      org.label-schema.schema-version="1.0" \
-      org.label-schema.docker.cmd="docker run -d --name some-nginx -v /some/nginx.conf:/etc/nginx/conf.d/default.conf:ro -p 8080:80 -p 443:443 ivaquero/rpi-nginx:0.1.0"
+LABEL org.opencontainers.image.description="An nginx image for raspberry pi" \
+      org.opencontainers.image.version="1.10.3"
 
-ADD dumb-init_v1.2.0 /usr/bin/dumb-init
+COPY /tini-static /tini
 
 RUN apt-get update && \
-    apt-get install -y nginx=1.6.2-5+deb8u4
+    apt-get install -y nginx=1.10.3-1+deb9u1 && \
+    mkdir /certs
 
 EXPOSE 80 443
 
 VOLUME /etc/nginx/conf.d
+VOLUME /certs
 
-ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+ENTRYPOINT ["/tini", "--"]
 CMD ["nginx", "-g", "daemon off;"]
