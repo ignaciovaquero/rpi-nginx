@@ -6,6 +6,8 @@ LABEL org.opencontainers.image.description="An nginx image for raspberry pi" \
 
 RUN apt-get update && \
     apt-get install -y nginx=1.10.3-1+deb9u1 && \
+    ln -sf /dev/stdout /var/log/nginx/access.log && \
+    ln -sf /dev/stderr /var/log/nginx/error.log && \
     mkdir /certs
 
 COPY tini-static /tini
@@ -26,6 +28,9 @@ ENV NGINX_SERVER_NAME=localhost \
 EXPOSE 80 443
 
 VOLUME /etc/nginx/conf.d
+VOLUME /certs
+
+HEALTHCHECK --interval=15s --timeout=5s --retries=3 CMD curl -f -k https://localhost || [ $? -eq 22 ]
 
 ENTRYPOINT ["/tini", "--"]
 CMD ["/docker-entrypoint.sh"]
